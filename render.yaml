@@ -2,14 +2,20 @@ services:
   - type: web
     name: movie-assistant-api
     env: python
-    buildCommand: pip install -r requirements.txt
+    region: oregon
+    plan: free
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
-      - key: FASTAPI_RELOAD
-        value: "False"
-      - key: FASTAPI_DEBUG
-        value: "False"
       - key: tmdb_api_key
         sync: false
       - key: groq_api_key
         sync: false
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+      - key: FASTAPI_RELOAD
+        value: "False"
+      - key: ALLOWED_ORIGINS
+        value: "*"

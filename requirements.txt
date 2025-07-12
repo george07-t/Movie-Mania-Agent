@@ -1,15 +1,24 @@
-fastapi[standard]==0.104.1
-uvicorn[standard]==0.24.0
+# Core FastAPI
+fastapi[standard]==0.115.0
+uvicorn[standard]==0.32.0
 python-dotenv==1.0.0
-pydantic==2.5.0
-langchain==0.1.0
-langchain-community==0.0.10
-langchain-core==0.1.0
-httpx==0.25.2
-langgraph==0.0.20
-requests==2.31.0
-langchain-ollama==0.0.1
+pydantic==2.10.0
+gunicorn==23.0.0
+
+# LangChain ecosystem (updated versions)
+langchain==0.3.0
+langchain-community==0.3.0
+langchain-core==0.3.0
+langchain-groq==0.2.0
+langgraph==0.2.0
+
+# HTTP clients
+httpx==0.28.0
+requests==2.32.0
+
+# Rate limiting & Redis
 slowapi==0.1.9
-langchain-groq==0.0.1
-redis==5.0.1
-gunicorn==21.2.0
+redis==5.2.0
+
+# Remove langchain-ollama since you're using Groq
+# langchain-ollama==0.3.4  # Only add if you need Ollama support

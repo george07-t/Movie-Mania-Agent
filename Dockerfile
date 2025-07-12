@@ -19,7 +19,8 @@ WORKDIR /home/movieapp
 
 # Copy requirements and install Python dependencies
 COPY --chown=movieapp:movieapp requirements.txt .
-RUN pip install --user --no-cache-dir -r requirements.txt
+RUN pip install --user --upgrade pip && \
+    pip install --user --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY --chown=movieapp:movieapp . .
@@ -32,7 +33,7 @@ EXPOSE 8000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8000/health')" || exit 1
+  CMD curl -f http://localhost:8000/health || exit 1
 
 # Run the application
-CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
