@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  movie-api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - tmdb_api_key=${TMDB_API_KEY}
+      - groq_api_key=${GROQ_API_KEY}
+      - FASTAPI_HOST=0.0.0.0
+      - FASTAPI_PORT=8000
+      - FASTAPI_RELOAD=False
+      - FASTAPI_DEBUG=False
+      - REDIS_URL=redis://redis:6379
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-*}
+    depends_on:
+      - redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:

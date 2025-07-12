@@ -32,8 +32,21 @@ chat_sessions: Dict[str, Dict] = {}
 # Thread pool for running synchronous agent
 executor = ThreadPoolExecutor(max_workers=4)
 
-# Rate limiter configuration
-limiter = Limiter(key_func=get_remote_address)
+# Rate limiter configuration with Redis URL for production
+REDIS_URL = os.getenv('REDIS_URL', None)
+if REDIS_URL:
+    from slowapi.middleware import SlowAPIMiddleware
+    limiter = Limiter(
+        key_func=get_remote_address,
+        storage_uri=REDIS_URL,
+        default_limits=["1000/hour", "100/minute"]
+    )
+else:
+    # Fallback to in-memory for development
+    limiter = Limiter(
+        key_func=get_remote_address,
+        default_limits=["1000/hour", "100/minute"]
+    )
 
 # FastAPI Configuration from Environment Variables
 FASTAPI_HOST = os.getenv('FASTAPI_HOST', '0.0.0.0')
@@ -68,11 +81,13 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # CORS middleware for mobile app
+# Production: Replace "*" with specific domains
+ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', '*').split(',')
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure for your Android app in production
+    allow_origins=ALLOWED_ORIGINS,  # In production: ["https://yourdomain.com", "https://app.yourdomain.com"]
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "DELETE"],  # Restrict methods
     allow_headers=["*"],
 )
 
@@ -159,6 +174,27 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
         timestamp=datetime.now()
     )
     return HTTPException(status_code=429, detail=response.dict())
+
+# Security and validation
+def validate_environment():
+    """Validate required environment variables"""
+    required_vars = ['tmdb_api_key']
+    missing_vars = [var for var in required_vars if not os.getenv(var)]
+    if missing_vars:
+        raise ValueError(f"Missing required environment variables: {missing_vars}")
+
+# Validate environment on startup
+validate_environment()
+
+# Security headers middleware
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return response
 
 # API Endpoints
 
