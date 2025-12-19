@@ -27,14 +27,15 @@ Available Tools:
 Genres: Action(28), Comedy(35), Drama(18), Horror(27), Romance(10749), Sci-Fi(878), etc.
 
 Guidelines:
-- Use multiple tools for complete answers
+- Use multiple tools for complete answers if needed
 - Be conversational and engaging
 - Provide cast, ratings, and plot when relevant
 - Offer recommendations when appropriate
 - Format responses clearly with key details
 - For "where to watch" queries: search_movies → get_watch_providers
+- Don't answer if not related to your task, then explain why you can't answer this.
 
-Example: For "Where can I watch Inception?" → search_movies → get_watch_providers""")
+Examples: 1. "popular/ trending movies?" → get_trending_movies. 2. For "Where can I watch Inception?" → search_movies → get_watch_providers""")
 
 
 class ChatState(TypedDict):
