@@ -262,8 +262,8 @@ nano .env
 Paste and fill in your actual keys:
 
 ```env
-tmdb_api_key=your_tmdb_api_key_here
-groq_api_key=your_groq_api_key_here
+TMDB_API_KEY=your key
+GROQ_API_KEY=your key
 GROQ_MODEL=llama-3.3-70b-versatile
 ALLOWED_ORIGINS=https://movie-mania.duckdns.org
 REDIS_URL=redis://redis:6379
