@@ -1,0 +1,39 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          timeout: 120s
+          script: |
+            cd /home/ubuntu/Movie-Mania-Agent
+            
+            # Pull latest code
+            git pull origin main
+            
+            # Recreate .env (secrets managed on server, just ensure it exists)
+            # If you want to push env via CI, add env secrets and echo them here
+            
+            # Build and restart containers
+            docker compose down
+            docker compose build --no-cache
+            docker compose up -d
+            
+            # Wait and check health
+            sleep 10
+            docker compose ps
+            curl -f http://localhost:8000/health && echo "Deploy successful!" || echo "Health check failed"

@@ -9,4 +9,5 @@ httpx
 langgraph
 requests
 slowapi
+redis>=4.0.0
 langchain-groq
